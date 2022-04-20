@@ -1,1 +1,1 @@
-# PowerPlatformGccDevOps
+# Power Platform GCC DevOps Sample
