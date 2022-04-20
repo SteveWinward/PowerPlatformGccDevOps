@@ -1,0 +1,95 @@
+name: Export Solution Template
+# Export solution from DEV environment
+#  unpack it and prepare, commit and push a git branch with the changes
+
+on:
+  workflow_call:
+    inputs: 
+      #Do Not change these values
+      #Values are set by the caller
+      #caller sample: release-action-call.ymnl
+      SOLUTION_NAME:
+        description: 'The solution name.'
+        type: string
+        default: ALMLab     
+      SOLUTION_OUTBOUND_FOLDER:
+        description: 'staging the unpacked solution folder before check-in *do not change*'
+        type: string
+        default: out/solutions/
+      SOLUTION_EXPORTS_FOLDER:
+        description: 'staging the unpacked solution folder before check-in *do not change*'
+        type: string
+        default: out/solutions/exported/
+      SOLUTION_SOURCE_FOLDER: 
+       description: 'folder name to be created and checked in *do not change*'
+       type: string
+       default: solutions/     
+      CLOUD_TYPE: 
+        description: 'The cloud type (UsGov, UsGovHigh, UsGovDoD)'
+        type: string
+        required: true
+    secrets:
+      AAD_APP_SECRET:
+        description: 'The secret of the AAD application for authentication'
+        required: true
+      AAD_CLIENT_ID:
+        description: 'The client ID of the AAD application for authentication'
+        required: true
+      AAD_TENANT_ID:
+        description: 'The tenant ID of the AAD application for authentication'
+        required: true
+      DEV_ENVIRONMENT_URL:
+        description: 'Development environment url.'
+        required: true    
+
+jobs:
+  export-from-dev:
+    runs-on: windows-latest
+    env:
+      RUNNER_DEBUG: 1
+      ENVIRONMENT_URL: ${{ inputs.DEV_ENVIRONMENT_URL }}
+      CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
+      AAD_APP_SECRET: ${{ secrets.AAD_APP_SECRET }}
+      TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
+      CLOUD: 'UsGov' # UsGov => GCC, UsGovHigh => GCCH, UsGovDod => DOD
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+
+    - name: who-am-i action
+      uses: microsoft/powerplatform-actions/who-am-i@v0
+      with:
+        environment-url: ${{ secrets.DEV_ENVIRONMENT_URL }}
+        app-id: ${{ secrets.AAD_CLIENT_ID }}
+        client-secret: ${{ secrets.AAD_APP_SECRET }}
+        tenant-id: ${{ secrets.AAD_TENANT_ID }}
+        cloud: ${{ inputs.CLOUD_TYPE }}
+
+    - name: export-solution action
+      uses: microsoft/powerplatform-actions/export-solution@v0
+      with:
+        environment-url: ${{ secrets.DEV_ENVIRONMENT_URL }}
+        app-id: ${{ secrets.AAD_CLIENT_ID }}
+        client-secret: ${{ secrets.AAD_APP_SECRET }}
+        tenant-id: ${{ secrets.AAD_TENANT_ID }}
+        cloud: ${{ inputs.CLOUD_TYPE }}
+        solution-name: ${{ inputs.SOLUTION_NAME }}
+        solution-output-file: ${{ inputs.SOLUTION_EXPORTS_FOLDER }}${{ inputs.SOLUTION_NAME }}.zip
+
+    - name: unpack-solution action
+      uses: microsoft/powerplatform-actions/unpack-solution@v0
+      with:
+        solution-file: ${{ inputs.SOLUTION_EXPORTS_FOLDER }}${{ inputs.SOLUTION_NAME }}.zip
+        solution-folder: ${{ inputs.SOLUTION_OUTBOUND_FOLDER }}${{ inputs.SOLUTION_NAME }}
+        solution-type: 'Unmanaged'
+        overwrite-files: true
+
+    - name: branch-solution, prepare it for a PullRequest
+      uses: microsoft/powerplatform-actions/branch-solution@v0
+      with:
+        solution-folder: ${{ inputs.SOLUTION_OUTBOUND_FOLDER }}${{ inputs.SOLUTION_NAME }}
+        solution-target-folder: ${{ inputs.SOLUTION_SOURCE_FOLDER }}${{ inputs.SOLUTION_NAME }}
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        allow-empty-commit: true

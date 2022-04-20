@@ -1,0 +1,20 @@
+name: Export HelloWorldCanvasApp Solution
+# Call the reusable workflow release-solution-with-inputs.yml
+# Release your solution to prod when you create a new release.
+
+on: 
+   workflow_dispatch:      
+
+jobs:
+  Export-HelloWorldCanvasApp-Solution:
+    uses: ./.github/workflows/export-solution-reusable.yml
+    with:
+      #You can specify the solution name here
+      SOLUTION_NAME: HelloWorldCanvasApp
+      #Update your values here
+      CLOUD_TYPE: 'UsGov'
+    secrets:
+      AAD_APP_SECRET: ${{ secrets.AAD_APP_SECRET }}
+      AAD_CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
+      AAD_TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
+      DEV_ENVIRONMENT_URL: ${{ secrets.DEV_ENVIRONMENT_URL }}

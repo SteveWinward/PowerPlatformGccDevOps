@@ -1,0 +1,25 @@
+name: Release HelloWorldCanvasApp Solution
+# Call the reusable workflow release-solution-with-inputs.yml
+# Release your solution to prod when you create a new release.
+
+on:
+  release:
+      types: [created]        
+
+jobs:
+  Release-HelloWorldCanvasApp-solution:
+    uses: ./.github/workflows/release-to-production-reusable.yml
+    with:
+      # The name of the solution file to publish to production
+      SOLUTION_NAME: HelloWorldCanvasApp
+      
+      # Public, UsGov, UsGovHigh, UsGovDod
+      CLOUD_TYPE: 'UsGov' 
+    secrets:
+      AAD_APP_SECRET: ${{ secrets.AAD_APP_SECRET }}
+      AAD_CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
+      AAD_TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
+      
+      # Update here with your actual build and production environment URLs
+      BUILD_ENVIRONMENT_URL: ${{ secrets.BUILD_ENVIRONMENT_URL }}
+      PRODUCTION_ENVIRONMENT_URL: ${{ secrets.PROD_ENVIRONMENT_URL }}
