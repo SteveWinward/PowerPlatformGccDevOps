@@ -9,9 +9,9 @@ jobs:
   Export-HelloWorldCanvasApp-Solution:
     uses: ./.github/workflows/export-solution-reusable.yml
     with:
-      #You can specify the solution name here
+      # You can specify the solution name here
       SOLUTION_NAME: HelloWorldCanvasApp
-      #Update your values here
+      # Update your actual cloud instance here (Public, UsGov, UsGovHigh, UsGovDoD)
       CLOUD_TYPE: 'UsGov'
     secrets:
       AAD_APP_SECRET: ${{ secrets.AAD_APP_SECRET }}
