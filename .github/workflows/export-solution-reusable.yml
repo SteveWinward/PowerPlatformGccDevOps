@@ -25,7 +25,7 @@ on:
        type: string
        default: solutions/     
       CLOUD_TYPE: 
-        description: 'The cloud type (UsGov, UsGovHigh, UsGovDoD)'
+        description: 'The cloud type (Public, UsGov, UsGovHigh, UsGovDoD)'
         type: string
         required: true
     secrets:
